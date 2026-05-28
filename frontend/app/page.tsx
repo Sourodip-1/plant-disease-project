@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { Paperclip, ArrowUp, X, ImageIcon, Leaf, Sprout, FlaskConical, CloudSun, Microscope, FileSearch, Zap } from "lucide-react";
+import { Paperclip, ArrowUp, X, ImageIcon, Leaf, Sprout, FlaskConical, CloudSun, Microscope, FileSearch, Zap, ChevronDown, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import AgentPlan, { DiagnosisStep } from "./components/ui/agent-plan";
 import { ImageGeneration } from "./components/ui/ai-chat-image-generation-1";
 
@@ -29,6 +30,7 @@ type AppState = "idle" | "thinking" | "done" | "error";
 
 // ─── Plant options ─────────────────────────────────────────────────────────────
 const PLANT_OPTIONS = [
+  "Unknown",
   "Apple",
   "Chili",
   "Citrus",
@@ -93,7 +95,7 @@ function ResultImagePanel({ src }: { src: string }) {
 }
 
 // ─── Diagnosis result card ────────────────────────────────────────────────────
-function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: string }) {
+function DiagnosisResult({ result, imageUrl, isTextQuery, query }: { result: ApiResult; imageUrl: string; isTextQuery?: boolean; query?: string }) {
   const probabilities = result.probabilities ?? [];
 
   return (
@@ -106,9 +108,17 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
       {/* Two-column grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
 
-        {/* LEFT – image + weather stacked */}
+        {/* LEFT – image/query + weather stacked */}
         <div className="flex flex-col gap-4">
-          <ResultImagePanel src={imageUrl} />
+          {isTextQuery ? (
+           <div className="w-full aspect-square flex flex-col justify-center items-center bg-teal-50 rounded-2xl border border-teal-200 shadow-sm p-6 text-center">
+             <FileSearch size={32} className="text-teal-500 mb-4" />
+             <p className="text-xs font-bold text-teal-600 uppercase tracking-widest mb-2">Text Query Analysis</p>
+             <p className="text-teal-900 italic font-medium text-sm line-clamp-6">"{query}"</p>
+           </div>
+          ) : (
+            <ResultImagePanel src={imageUrl} />
+          )}
 
           {/* Weather card */}
           {result.weather && (
@@ -253,7 +263,7 @@ function CheckCircleIcon() {
 
 
 // ─── Thinking progress panel ──────────────────────────────────────────────────
-function ThinkingPanel({ steps, imageUrl, isComplete }: { steps: DiagnosisStep[]; imageUrl: string; isComplete: boolean }) {
+function ThinkingPanel({ steps, imageUrl, isComplete, isTextQuery, query }: { steps: DiagnosisStep[]; imageUrl: string; isComplete: boolean; isTextQuery?: boolean; query?: string }) {
   const completedCount = steps.filter((s) => s.status === "completed").length;
   const progress = steps.length > 0 ? completedCount / steps.length : 0;
 
@@ -264,12 +274,20 @@ function ThinkingPanel({ steps, imageUrl, isComplete }: { steps: DiagnosisStep[]
       transition={{ duration: 0.4 }}
       className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 w-full"
     >
-      {/* left — image with controlled blur reveal */}
+      {/* left — image with controlled blur reveal OR text query placeholder */}
       <div className="w-full">
-        <ImageGeneration isComplete={isComplete} progress={progress}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
-        </ImageGeneration>
+        {isTextQuery ? (
+           <div className="w-full aspect-square flex flex-col justify-center items-center bg-slate-100 rounded-2xl border border-slate-200 shadow-inner p-6 text-center">
+             <FileSearch size={32} className="text-teal-400 mb-4" />
+             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Analyzing Text Query</p>
+             <p className="text-slate-700 italic font-medium text-sm line-clamp-4">"{query}"</p>
+           </div>
+        ) : (
+          <ImageGeneration isComplete={isComplete} progress={progress}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
+          </ImageGeneration>
+        )}
       </div>
 
       {/* right — steps */}
@@ -290,13 +308,90 @@ function ThinkingPanel({ steps, imageUrl, isComplete }: { steps: DiagnosisStep[]
 }
 
 
+// ─── Custom Select Dropdown Component ──────────────────────────────────────────
+interface CustomSelectProps {
+  value: string;
+  onChange: (val: string) => void;
+  options: string[];
+  className?: string;
+  size?: "sm" | "md";
+}
+
+function CustomSelect({ value, onChange, options, className, size = "md" }: CustomSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className={cn("relative", className)}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-full flex items-center justify-between bg-white border border-slate-200 text-slate-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition shadow-sm cursor-pointer",
+          size === "sm" ? "px-3 py-2 text-xs font-semibold rounded-lg" : "px-4 py-3 text-sm font-medium rounded-xl"
+        )}
+      >
+        <span>{value}</span>
+        <ChevronDown size={size === "sm" ? 14 : 16} className={cn("text-slate-400 transition-transform duration-200", isOpen && "rotate-180")} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.15 }}
+            className={cn(
+              "absolute z-50 w-full bottom-full mb-1.5 bg-white border border-slate-200/80 shadow-lg max-h-60 overflow-y-auto no-scrollbar py-1",
+              size === "sm" ? "rounded-lg" : "rounded-xl"
+            )}
+          >
+            {options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "w-full text-left transition-colors font-medium text-slate-700 hover:bg-slate-50 hover:text-teal-600 flex items-center justify-between cursor-pointer",
+                  size === "sm" ? "px-3 py-2 text-xs" : "px-4 py-2.5 text-sm",
+                  value === opt && "bg-teal-50/50 text-teal-600 font-bold"
+                )}
+              >
+                <span>{opt}</span>
+                {value === opt && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                )}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [message, setMessage] = useState("");
-  const [plantType, setPlantType] = useState("Tomato");
+  const [plantType, setPlantType] = useState("Unknown");
   const [location, setLocation] = useState("");
 
   const handleReset = () => {
@@ -309,6 +404,7 @@ export default function Home() {
   };
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isTextQuery, setIsTextQuery] = useState(false);
   const [appState, setAppState] = useState<AppState>("idle");
   const [steps, setSteps] = useState<DiagnosisStep[]>([]);
   const [result, setResult] = useState<ApiResult | null>(null);
@@ -321,6 +417,32 @@ export default function Home() {
   useEffect(() => {
     fetch(`${HF_URL}/`)
       .catch(err => console.log("Warmup ping failed:", err));
+  }, []);
+
+  // Global paste handler for images
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+            setAppState("idle");
+            setResult(null);
+            setTimeout(() => textareaRef.current?.focus(), 50);
+            e.preventDefault();
+            break;
+          }
+        }
+      }
+    };
+    
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
   }, []);
 
   // Animate steps sequentially with a given ms-per-step then call callback
@@ -356,13 +478,63 @@ export default function Home() {
   const handleSend = async () => {
     if (appState === "thinking") return;
 
-    if (!imageFile) {
-      // Trigger file upload since image is required for diagnosis
-      fileInputRef.current?.click();
-      return;
+    let currentImageFile = imageFile;
+    let currentPlantType = plantType;
+    let currentLocation = location;
+    let extractedFeatures = "";
+    let isTextOnly = false;
+
+    if (!currentImageFile) {
+      if (!message.trim()) {
+        // Trigger file upload if neither image nor message is present
+        fileInputRef.current?.click();
+        return;
+      }
+      
+      isTextOnly = true;
+      setIsTextQuery(true);
+      
+      // Create a dummy 1x1 image for the API
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#f1f5f9";
+        ctx.fillRect(0, 0, 1, 1);
+      }
+      
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg"));
+      if (blob) {
+        currentImageFile = new File([blob], "dummy.jpg", { type: "image/jpeg" });
+      }
+
+      // Extract features using LLM
+      try {
+        const extRes = await fetch("/api/extract-query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: message })
+        });
+        if (extRes.ok) {
+          const extJson = await extRes.json();
+          if (extJson.status === "success" && extJson.data) {
+            if (extJson.data.plant_type && extJson.data.plant_type !== "Unknown") {
+               currentPlantType = extJson.data.plant_type;
+            }
+            if (extJson.data.location && extJson.data.location !== "Unknown") {
+               currentLocation = extJson.data.location;
+            }
+            extractedFeatures = extJson.data.features || message;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to extract features", err);
+        extractedFeatures = message;
+      }
     }
 
-    const finalLocation = location.trim() || "Unknown Location";
+    const finalLocation = currentLocation.trim() || "Unknown Location";
     setAppState("thinking");
     setResult(null);
     setErrorMsg("");
@@ -393,9 +565,12 @@ export default function Home() {
 
     // Kick off real API call simultaneously
     const formData = new FormData();
-    formData.append("file", imageFile);
-    formData.append("plant_type", plantType.toLowerCase());
+    formData.append("file", currentImageFile!);
+    formData.append("plant_type", currentPlantType.toLowerCase());
     formData.append("location", finalLocation);
+    if (extractedFeatures) {
+      formData.append("features", extractedFeatures);
+    }
 
     try {
       const res = await fetch(`${HF_URL}/predict`, {
@@ -425,7 +600,8 @@ export default function Home() {
             plant_type: data.plant_type || plantType,
             location: data.location?.name || finalLocation,
             diagnosis: data.diagnosis || "Unknown Disease",
-            weather: weather
+            weather: weather,
+            user_query: isTextOnly ? (extractedFeatures || message) : undefined
           }),
         });
 
@@ -433,6 +609,7 @@ export default function Home() {
           const aiJson = await aiRes.json();
           if (aiJson.status === "success" && aiJson.data) {
             generatedDetails = {
+              diagnosis: aiJson.data.diagnosis || generatedDetails.diagnosis,
               symptoms: aiJson.data.symptoms || generatedDetails.symptoms,
               treatment: aiJson.data.treatment || generatedDetails.treatment,
               ai_explanation: aiJson.data.ai_explanation || generatedDetails.ai_explanation
@@ -448,7 +625,7 @@ export default function Home() {
         status: rawJson.status === "success" ? "success" : "error",
         plant_type: data.plant_type || plantType,
         location: data.location?.name || finalLocation,
-        diagnosis: data.diagnosis || "Unknown Disease",
+        diagnosis: isTextOnly && generatedDetails.diagnosis ? generatedDetails.diagnosis : (data.diagnosis || "Unknown Disease"),
         confidence: 0.95,
         symptoms: generatedDetails.symptoms,
         treatment: generatedDetails.treatment,
@@ -489,6 +666,7 @@ export default function Home() {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setIsTextQuery(false);
       setAppState("idle");
       setResult(null);
       // Auto-focus the textarea
@@ -502,6 +680,7 @@ export default function Home() {
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setIsTextQuery(false);
     setAppState("idle");
     setResult(null);
   };
@@ -580,15 +759,15 @@ export default function Home() {
 
             {/* ── THINKING STATE ──────────────────── */}
             <AnimatePresence>
-              {appState === "thinking" && imagePreview && (
-                <ThinkingPanel key="thinking" steps={steps} imageUrl={imagePreview} isComplete={false} />
+              {appState === "thinking" && (imagePreview || isTextQuery) && (
+                <ThinkingPanel key="thinking" steps={steps} imageUrl={imagePreview || ""} isComplete={false} isTextQuery={isTextQuery} query={message} />
               )}
             </AnimatePresence>
 
             {/* ── RESULT STATE ────────────────────── */}
             <AnimatePresence>
-              {appState === "done" && result && imagePreview && (
-                <DiagnosisResult key="result" result={result} imageUrl={imagePreview} />
+              {appState === "done" && result && (imagePreview || isTextQuery) && (
+                <DiagnosisResult key="result" result={result} imageUrl={imagePreview || ""} isTextQuery={isTextQuery} query={message} />
               )}
             </AnimatePresence>
 
@@ -629,13 +808,12 @@ export default function Home() {
                 exit={{ opacity: 0, y: 8 }}
                 className="flex flex-col sm:flex-row gap-3 mb-3"
               >
-                <select
+                <CustomSelect
                   value={plantType}
-                  onChange={(e) => setPlantType(e.target.value)}
-                  className="flex-1 rounded-xl bg-white border border-slate-200 shadow-sm px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition"
-                >
-                  {PLANT_OPTIONS.map((p) => <option key={p} className="bg-white">{p}</option>)}
-                </select>
+                  onChange={setPlantType}
+                  options={PLANT_OPTIONS}
+                  className="flex-1"
+                />
                 <input
                   type="text"
                   placeholder="Location (e.g. Asansol, India)"
@@ -677,13 +855,12 @@ export default function Home() {
                   <div className="flex-1 flex flex-col sm:flex-row gap-3">
                     <div className="flex-1 flex flex-col gap-1.5">
                       <label className="text-[10px] text-teal-600 font-bold tracking-wider uppercase px-1">Plant Type</label>
-                      <select
+                      <CustomSelect
                         value={plantType}
-                        onChange={(e) => setPlantType(e.target.value)}
-                        className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-sm"
-                      >
-                        {PLANT_OPTIONS.map((p) => <option key={p} className="bg-white">{p}</option>)}
-                      </select>
+                        onChange={setPlantType}
+                        options={PLANT_OPTIONS}
+                        size="sm"
+                      />
                     </div>
                     <div className="flex-1 flex flex-col gap-1.5">
                       <label className="text-[10px] text-teal-600 font-bold tracking-wider uppercase px-1">Location</label>
@@ -725,6 +902,16 @@ export default function Home() {
                   className="hidden"
                 />
 
+                {/* Hidden camera input */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  ref={cameraInputRef}
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+
                 {/* Attach photo */}
                 <motion.button
                   whileTap={{ scale: 0.88 }}
@@ -736,6 +923,19 @@ export default function Home() {
                 >
                   {imageFile ? <ImageIcon size={18} /> : <Paperclip size={18} />}
                 </motion.button>
+
+                {/* Camera button (only if no image) */}
+                {!imageFile && (
+                  <motion.button
+                    whileTap={{ scale: 0.88 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => cameraInputRef.current?.click()}
+                    title="Take photo"
+                    className="h-10 w-10 rounded-xl flex items-center justify-center transition-colors hover:bg-slate-100 text-slate-500"
+                  >
+                    <Camera size={18} />
+                  </motion.button>
+                )}
 
                 {/* Options toggle */}
                 <motion.button

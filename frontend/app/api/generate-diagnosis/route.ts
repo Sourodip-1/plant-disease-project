@@ -9,13 +9,27 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { plant_type, location, diagnosis, weather } = body;
+    const { plant_type, location, diagnosis, weather, user_query } = body;
 
     const weatherString = weather
       ? `Temperature: ${weather.temperature_c}°C, Humidity: ${weather.humidity_pct}%, Rainfall: ${weather.rain_mm}mm, Soil: ${weather.soil_category}`
       : "Unknown";
 
-    const prompt = `You are an expert plant pathologist and agronomist. 
+    const prompt = user_query
+      ? `You are an expert plant pathologist and agronomist. 
+A user has reported the following issue with their "${plant_type}" plant located in "${location}": "${user_query}".
+The current weather conditions are: ${weatherString}.
+
+Based on these symptoms, please diagnose the most likely disease or condition.
+You MUST output ONLY a raw JSON object (without Markdown code blocks, just the JSON string).
+The JSON object must have exactly the following structure:
+{
+  "diagnosis": "Short Name of the Disease/Condition (e.g. Stem Rot, Late Blight)",
+  "symptoms": ["Detailed symptom 1", "Detailed symptom 2", "Detailed symptom 3"],
+  "treatment": ["Step 1 of treatment plan", "Step 2 of treatment plan", "Step 3 of treatment plan"],
+  "ai_explanation": "A short, professional paragraph explaining why this disease occurs under these conditions and how the treatment helps."
+}`
+      : `You are an expert plant pathologist and agronomist. 
 A vision model has diagnosed a "${plant_type}" plant located in "${location}" with the following disease/condition: "${diagnosis}".
 The current weather conditions are: ${weatherString}.
 
@@ -23,6 +37,7 @@ Please provide a detailed, practical, and highly accurate analysis.
 You MUST output ONLY a raw JSON object (without Markdown code blocks, just the JSON string).
 The JSON object must have exactly the following structure:
 {
+  "diagnosis": "${diagnosis}",
   "symptoms": ["Detailed symptom 1", "Detailed symptom 2", "Detailed symptom 3"],
   "treatment": ["Step 1 of treatment plan", "Step 2 of treatment plan", "Step 3 of treatment plan"],
   "ai_explanation": "A short, professional paragraph explaining why this disease occurs under these conditions and how the treatment helps."
