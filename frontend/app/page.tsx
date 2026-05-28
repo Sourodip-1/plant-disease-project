@@ -586,7 +586,8 @@ export default function Home() {
       const visionProbs = symptomsObj.vision_probabilities || {};
 
       // Step 2: Call the local API route to generate structured treatment/explanation using NVIDIA Llama
-      let generatedDetails = {
+      let generatedDetails: { diagnosis?: string; symptoms: string[]; treatment: string[]; ai_explanation: string; } = {
+        diagnosis: undefined,
         symptoms: symptomsObj.detected_physical_symptoms || ["Leaf spotting", "Discoloration", "Wilting"],
         treatment: ["Remove affected leaves", "Apply appropriate fungicide", "Monitor moisture levels"],
         ai_explanation: "The model detected visual patterns consistent with this pathogen."
