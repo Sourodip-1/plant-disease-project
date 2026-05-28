@@ -38,7 +38,7 @@ export const ImageGeneration = ({ children, isComplete = false, progress = 0 }: 
   }, [isComplete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className={cn("flex flex-col gap-2 w-full")}>
+    <div className={cn("flex flex-col gap-3 w-full")}>
 
       {/* Shimmer status label */}
       <AnimatePresence mode="wait">
@@ -48,11 +48,11 @@ export const ImageGeneration = ({ children, isComplete = false, progress = 0 }: 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
           transition={{ duration: 0.35 }}
-          className="text-sm font-medium"
+          className="text-sm font-bold"
           style={{
             background: isComplete
-              ? "linear-gradient(110deg, rgba(20,184,166,1) 0%, #ffffff 50%, rgba(20,184,166,1) 100%)"
-              : "linear-gradient(110deg, rgba(20,184,166,0.45) 0%, rgba(20,184,166,0.45) 30%, rgba(255,255,255,0.85) 50%, rgba(20,184,166,0.45) 70%, rgba(20,184,166,0.45) 100%)",
+              ? "linear-gradient(110deg, #0f172a 0%, #334155 50%, #0f172a 100%)"
+              : "linear-gradient(110deg, #14b8a6 0%, #14b8a6 30%, #334155 50%, #14b8a6 70%, #14b8a6 100%)",
             backgroundSize: "200% 100%",
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
@@ -66,7 +66,7 @@ export const ImageGeneration = ({ children, isComplete = false, progress = 0 }: 
 
       {/* Image box — square, with blur overlay */}
       <div
-        className="relative w-full rounded-2xl border border-white/10 overflow-hidden"
+        className="relative w-full rounded-2xl border border-slate-200 shadow-md overflow-hidden bg-slate-100"
         style={{ aspectRatio: "1 / 1" }}
       >
         {/* Actual image — always behind */}
@@ -78,9 +78,9 @@ export const ImageGeneration = ({ children, isComplete = false, progress = 0 }: 
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "rgba(0,0,0,0.15)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 48px)",
-            maskImage: "linear-gradient(to bottom, transparent 0%, black 48px)",
+            background: "rgba(255,255,255,0.4)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, white 48px)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, white 48px)",
           }}
           animate={(isComplete ? {
             y: "100%",

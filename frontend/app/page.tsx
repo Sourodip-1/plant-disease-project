@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Paperclip, ArrowUp, X, ImageIcon, Leaf, Sprout, FlaskConical, CloudSun, Microscope, FileSearch, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AgentPlan, { DiagnosisStep } from "./components/ui/agent-plan";
@@ -36,7 +36,7 @@ const PLANT_OPTIONS = [
   "Grape",
   "Melon",
   "Potato",
-  "Tomato"
+  "Tomato",
 ];
 
 // ─── Diagnosis steps that animate during thinking ──────────────────────────────
@@ -54,20 +54,20 @@ function buildSteps(): DiagnosisStep[] {
 // ─── Animated shimmering image placeholder ───────────────────────────────────
 function ImageSkeleton() {
   return (
-    <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/5 border border-white/10">
+    <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
         animate={{ x: ["-100%", "200%"] }}
         transition={{ repeat: Infinity, duration: 1.6, ease: "linear" }}
       />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-30">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-60">
         <motion.div
-          animate={{ scale: [1, 1.08, 1], opacity: [0.4, 1, 0.4] }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
-          <Leaf size={36} className="text-teal-400" />
+          <Leaf size={36} className="text-teal-500" />
         </motion.div>
-        <p className="text-xs text-white/50 tracking-widest uppercase">Analysing</p>
+        <p className="text-xs text-slate-500 tracking-widest uppercase font-medium">Analysing</p>
       </div>
     </div>
   );
@@ -80,12 +80,12 @@ function ResultImagePanel({ src }: { src: string }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: [0.2, 0.65, 0.3, 0.9] }}
-      className="relative w-full aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+      className="relative w-full aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-md"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="Uploaded plant leaf" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white/70 bg-black/40 rounded-xl px-3 py-1.5 backdrop-blur-sm">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white/90 bg-black/40 rounded-xl px-3 py-1.5 backdrop-blur-sm font-medium">
         <ImageIcon size={12} /> Uploaded image
       </div>
     </motion.div>
@@ -112,13 +112,13 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
 
           {/* Weather card */}
           {result.weather && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-5 py-4">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2"><CloudSun size={14} className="text-cyan-400" />Live Weather</h3>
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4">
+              <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><CloudSun size={14} className="text-cyan-500" />Live Weather</h3>
               <div className="grid grid-cols-2 gap-2">
                 {result.weather.temperature != null && (
-                  <div className="rounded-xl bg-white/4 px-3 py-2">
-                    <p className="text-xs text-white/40">Temperature</p>
-                    <p className="text-lg font-bold">
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <p className="text-xs text-slate-500 font-medium">Temperature</p>
+                    <p className="text-lg font-bold text-slate-800">
                       {typeof result.weather.temperature === "number"
                         ? result.weather.temperature.toFixed(1)
                         : result.weather.temperature}°C
@@ -126,9 +126,9 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
                   </div>
                 )}
                 {result.weather.humidity != null && (
-                  <div className="rounded-xl bg-white/4 px-3 py-2">
-                    <p className="text-xs text-white/40">Humidity</p>
-                    <p className="text-lg font-bold">
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <p className="text-xs text-slate-500 font-medium">Humidity</p>
+                    <p className="text-lg font-bold text-slate-800">
                       {typeof result.weather.humidity === "number"
                         ? Math.round(result.weather.humidity)
                         : result.weather.humidity}%
@@ -136,9 +136,9 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
                   </div>
                 )}
                 {result.weather.rainfall != null && (
-                  <div className="rounded-xl bg-white/4 px-3 py-2">
-                    <p className="text-xs text-white/40">Rainfall</p>
-                    <p className="text-lg font-bold">
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <p className="text-xs text-slate-500 font-medium">Rainfall</p>
+                    <p className="text-lg font-bold text-slate-800">
                       {typeof result.weather.rainfall === "number"
                         ? result.weather.rainfall.toFixed(1)
                         : result.weather.rainfall}mm
@@ -146,9 +146,9 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
                   </div>
                 )}
                 {result.weather.description && (
-                  <div className="rounded-xl bg-white/4 px-3 py-2 col-span-2">
-                    <p className="text-xs text-white/40">Condition</p>
-                    <p className="text-sm font-medium capitalize">{result.weather.description}</p>
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2 col-span-2">
+                    <p className="text-xs text-slate-500 font-medium">Condition</p>
+                    <p className="text-sm font-semibold text-slate-700 capitalize">{result.weather.description}</p>
                   </div>
                 )}
               </div>
@@ -157,18 +157,18 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
 
           {/* Probabilities */}
           {probabilities.length > 0 && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-5 py-4">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2"><FlaskConical size={14} className="text-teal-400" />Disease Probabilities</h3>
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4">
+              <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><FlaskConical size={14} className="text-teal-500" />Disease Probabilities</h3>
               <div className="space-y-3">
                 {probabilities.slice(0, 4).map(({ label, confidence }) => (
                   <div key={label}>
-                    <div className="flex justify-between text-xs text-white/60 mb-1">
+                    <div className="flex justify-between text-xs text-slate-600 font-medium mb-1.5">
                       <span>{label}</span>
-                      <span>{Math.round(confidence * 100)}%</span>
+                      <span className="text-slate-800 font-semibold">{Math.round(confidence * 100)}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-teal-500 to-cyan-400 rounded-full"
+                        className="h-full bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.round(confidence * 100)}%` }}
                         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
@@ -185,21 +185,23 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
         <div className="flex flex-col gap-4 min-w-0">
 
           {/* Disease headline */}
-          <div className="rounded-2xl border border-teal-500/25 bg-teal-500/8 px-5 py-4">
-            <p className="text-xs text-teal-400/60 uppercase tracking-widest mb-1">Final Diagnosis</p>
-            <h2 className="text-3xl font-bold text-teal-300 leading-tight">{result.diagnosis}</h2>
+          <div className="rounded-2xl border border-teal-200 bg-teal-50 px-6 py-5 shadow-sm">
+            <p className="text-xs text-teal-600/80 font-bold uppercase tracking-widest mb-1.5">Final Diagnosis</p>
+            <h2 className="text-3xl font-extrabold text-teal-900 leading-tight">{result.diagnosis}</h2>
             {result.confidence != null && (
-              <p className="text-sm text-white/50 mt-1">{Math.round(result.confidence * 100)}% confidence · {result.plant_type} · {result.location}</p>
+              <p className="text-sm text-teal-700 mt-2 font-medium">
+                {Math.round(result.confidence * 100)}% confidence · {result.plant_type} · {result.location}
+              </p>
             )}
           </div>
 
           {/* Symptoms */}
           {result.symptoms?.length > 0 && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-5 py-4">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2"><Microscope size={14} className="text-emerald-400" />Symptoms Detected</h3>
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-6 py-5">
+              <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><Microscope size={16} className="text-emerald-500" />Symptoms Detected</h3>
               <div className="flex flex-wrap gap-2">
                 {result.symptoms.map((s) => (
-                  <span key={s} className="px-3 py-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 text-xs">{s}</span>
+                  <span key={s} className="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm">{s}</span>
                 ))}
               </div>
             </div>
@@ -207,19 +209,19 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
 
           {/* Treatment */}
           {result.treatment?.length > 0 && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-5 py-4">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2"><Sprout size={14} className="text-lime-400" />Treatment & Recovery</h3>
-              <ul className="space-y-2">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-6 py-5">
+              <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><Sprout size={16} className="text-lime-600" />Treatment & Recovery</h3>
+              <ul className="space-y-3">
                 {result.treatment.map((t, i) => (
                   <motion.li
                     key={i}
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.07 }}
-                    className="flex items-start gap-2 text-sm text-white/70"
+                    className="flex items-start gap-3 text-sm text-slate-700 font-medium"
                   >
-                    <span className="text-lime-400 mt-0.5 flex-shrink-0">•</span>
-                    {t}
+                    <span className="text-lime-500 mt-0.5 flex-shrink-0"><CheckCircleIcon /></span>
+                    <span className="leading-relaxed">{t}</span>
                   </motion.li>
                 ))}
               </ul>
@@ -228,15 +230,24 @@ function DiagnosisResult({ result, imageUrl }: { result: ApiResult; imageUrl: st
 
           {/* AI Explanation */}
           {result.ai_explanation && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-5 py-4">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2"><FileSearch size={14} className="text-violet-400" />AI Explanation</h3>
-              <p className="text-sm text-white/60 leading-relaxed">{result.ai_explanation}</p>
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-6 py-5">
+              <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><FileSearch size={16} className="text-violet-500" />AI Explanation</h3>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{result.ai_explanation}</p>
             </div>
           )}
 
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
   );
 }
 
@@ -262,15 +273,15 @@ function ThinkingPanel({ steps, imageUrl, isComplete }: { steps: DiagnosisStep[]
       </div>
 
       {/* right — steps */}
-      <div className="flex-1 rounded-2xl border border-white/10 bg-white/4 backdrop-blur-sm px-5 py-5">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="flex-1 rounded-2xl border border-slate-200 bg-white shadow-sm px-6 py-6">
+        <div className="flex items-center gap-2 mb-5">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
           >
-            <Zap size={14} className="text-teal-400" />
+            <Zap size={16} className="text-teal-500" />
           </motion.div>
-          <p className="text-sm font-semibold text-white/60 uppercase tracking-widest">Analysing</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Analysing</p>
         </div>
         <AgentPlan steps={steps} />
       </div>
@@ -343,7 +354,13 @@ export default function Home() {
   }, []);
 
   const handleSend = async () => {
-    if (!imageFile) return;
+    if (appState === "thinking") return;
+
+    if (!imageFile) {
+      // Trigger file upload since image is required for diagnosis
+      fileInputRef.current?.click();
+      return;
+    }
 
     const finalLocation = location.trim() || "Unknown Location";
     setAppState("thinking");
@@ -352,12 +369,12 @@ export default function Home() {
 
     // Start step animation; API call runs in parallel
     let apiFinished = false;
+    let animFinished = false;
     let apiData: ApiResult | null = null;
     let apiError = "";
 
-    // Kick off steps
-    runStepAnimation(() => {
-      if (apiFinished) {
+    const checkDone = () => {
+      if (apiFinished && animFinished) {
         if (apiError) {
           setErrorMsg(apiError);
           setAppState("error");
@@ -366,6 +383,12 @@ export default function Home() {
           setAppState("done");
         }
       }
+    };
+
+    // Kick off steps
+    runStepAnimation(() => {
+      animFinished = true;
+      checkDone();
     });
 
     // Kick off real API call simultaneously
@@ -381,12 +404,12 @@ export default function Home() {
       });
       if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
       const rawJson = await res.json();
-      
+
       const data = rawJson.data || {};
       const weather = data.weather || {};
       const symptomsObj = data.symptoms || {};
       const visionProbs = symptomsObj.vision_probabilities || {};
-      
+
       // Step 2: Call the local API route to generate structured treatment/explanation using NVIDIA Llama
       let generatedDetails = {
         symptoms: symptomsObj.detected_physical_symptoms || ["Leaf spotting", "Discoloration", "Wilting"],
@@ -405,15 +428,15 @@ export default function Home() {
             weather: weather
           }),
         });
-        
+
         if (aiRes.ok) {
           const aiJson = await aiRes.json();
           if (aiJson.status === "success" && aiJson.data) {
-             generatedDetails = {
-               symptoms: aiJson.data.symptoms || generatedDetails.symptoms,
-               treatment: aiJson.data.treatment || generatedDetails.treatment,
-               ai_explanation: aiJson.data.ai_explanation || generatedDetails.ai_explanation
-             };
+            generatedDetails = {
+              symptoms: aiJson.data.symptoms || generatedDetails.symptoms,
+              treatment: aiJson.data.treatment || generatedDetails.treatment,
+              ai_explanation: aiJson.data.ai_explanation || generatedDetails.ai_explanation
+            };
           }
         }
       } catch (err) {
@@ -448,7 +471,7 @@ export default function Home() {
       } else {
         apiData.confidence = 0.95;
       }
-      
+
     } catch (e: unknown) {
       if (e instanceof Error) {
         apiError = e.message;
@@ -457,6 +480,7 @@ export default function Home() {
       }
     } finally {
       apiFinished = true;
+      checkDone();
     }
   };
 
@@ -467,6 +491,10 @@ export default function Home() {
       setImagePreview(URL.createObjectURL(file));
       setAppState("idle");
       setResult(null);
+      // Auto-focus the textarea
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 50);
     }
     e.target.value = "";
   };
@@ -478,48 +506,48 @@ export default function Home() {
     setResult(null);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
-  const canSend = !!imageFile && appState !== "thinking";
+  const canSend = (!!imageFile || message.trim().length > 0) && appState !== "thinking";
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-black text-white flex flex-col w-full">
+    <main className="relative h-[100dvh] overflow-hidden bg-slate-50 text-slate-900 flex flex-col w-full selection:bg-teal-200">
 
       {/* ── BACKGROUND ───────────────────────────────────────────── */}
-      <div className="absolute inset-0 bg-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(13,148,136,0.18),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(6,182,212,0.12),transparent_50%)]" />
+      <div className="absolute inset-0 bg-slate-50" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(20,184,166,0.06),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(6,182,212,0.04),transparent_50%)]" />
       {/* plus grid */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="grid grid-cols-[repeat(24,1fr)] h-full w-full opacity-40">
           {Array.from({ length: 480 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-center text-[18px] text-teal-950/40">+</div>
+            <div key={i} className="flex items-center justify-center text-[18px] text-slate-300">+</div>
           ))}
         </div>
       </div>
       {/* noise */}
-      <div className="absolute inset-0 opacity-[0.03] mix-blend-screen bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="absolute inset-0 opacity-[0.02] mix-blend-multiply bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
       {/* ── HEADER ───────────────────────────────────────────────── */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/8 backdrop-blur-sm">
+      <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-slate-200/60 bg-white/50 backdrop-blur-md">
         <button
           onClick={handleReset}
-          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none outline-none p-0 text-white"
+          className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity bg-transparent border-none outline-none p-0 text-slate-900"
         >
-          <span className="font-semibold text-sm tracking-wide">PlantMD</span>
+          <span className="font-extrabold text-sm tracking-wide flex items-center gap-2"><Leaf size={16} className="text-teal-500" /> PlantMD</span>
         </button>
-        <p className="text-xs text-white/30 hidden sm:block">AI-powered crop disease detection</p>
+        <p className="text-xs font-semibold text-slate-500 hidden sm:block">AI-powered crop disease detection</p>
       </header>
 
       {/* ── SCROLL AREA ──────────────────────────────────────────── */}
       <div className="relative z-10 flex-1 min-h-0 flex flex-col w-full">
         <div
-          className="flex-1 overflow-y-auto px-4 py-8 w-full"
+          className="flex-1 overflow-y-auto no-scrollbar px-4 py-8 w-full"
           style={{
             WebkitMaskImage: "linear-gradient(to bottom, black calc(100% - 112px), transparent 100%)",
             maskImage: "linear-gradient(to bottom, black calc(100% - 112px), transparent 100%)"
@@ -537,13 +565,13 @@ export default function Home() {
                   transition={{ duration: 0.4 }}
                   className="flex flex-col items-center text-center pt-16 pb-8"
                 >
-                  <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-3">
+                  <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-4 text-slate-900">
                     Plant Disease<br />Diagnosis
                   </h1>
-                  <p className="text-blue-400/70 tracking-[0.15em] uppercase text-xs mb-4">
+                  <p className="text-teal-600 font-bold tracking-[0.15em] uppercase text-xs mb-4">
                     AI-powered crop health assistant
                   </p>
-                  <p className="text-white/40 max-w-md text-base leading-relaxed">
+                  <p className="text-slate-500 font-medium max-w-md text-base leading-relaxed">
                     Attach a leaf photo below, select your plant type and location, then hit send to get an instant AI diagnosis.
                   </p>
                 </motion.div>
@@ -571,13 +599,13 @@ export default function Home() {
                   key="error"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-2xl border border-blue-500/30 bg-blue-500/10 px-6 py-5 text-center"
+                  className="rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-center shadow-sm"
                 >
-                  <p className="text-blue-400 font-semibold mb-1">Diagnosis failed</p>
-                  <p className="text-sm text-white/50">{errorMsg}</p>
+                  <p className="text-red-600 font-bold mb-1">Diagnosis failed</p>
+                  <p className="text-sm text-red-500 font-medium">{errorMsg}</p>
                   <button
                     onClick={() => setAppState("idle")}
-                    className="mt-4 text-xs px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 transition"
+                    className="mt-4 text-xs font-semibold px-5 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition shadow-sm"
                   >
                     Try again
                   </button>
@@ -599,28 +627,29 @@ export default function Home() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
-                className="flex flex-col sm:flex-row gap-2 mb-2"
+                className="flex flex-col sm:flex-row gap-3 mb-3"
               >
                 <select
                   value={plantType}
                   onChange={(e) => setPlantType(e.target.value)}
-                  className="flex-1 rounded-xl bg-white/6 border border-white/12 px-4 py-2.5 text-sm text-white outline-none focus:border-teal-500/50 transition"
+                  className="flex-1 rounded-xl bg-white border border-slate-200 shadow-sm px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition"
                 >
-                  {PLANT_OPTIONS.map((p) => <option key={p} className="bg-black">{p}</option>)}
+                  {PLANT_OPTIONS.map((p) => <option key={p} className="bg-white">{p}</option>)}
                 </select>
                 <input
                   type="text"
                   placeholder="Location (e.g. Asansol, India)"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="flex-1 rounded-xl bg-white/6 border border-white/12 px-4 py-2.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-teal-500/50 transition"
+                  onKeyDown={handleKeyDown}
+                  className="flex-1 rounded-xl bg-white border border-slate-200 shadow-sm px-4 py-3 text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Chat box */}
-          <div className="rounded-[20px] border border-white/12 bg-white/6 backdrop-blur-xl shadow-2xl px-4 py-3 flex flex-col gap-2">
+          <div className="rounded-[24px] border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-[0_8px_40px_rgb(0,0,0,0.06)] px-4 py-3.5 flex flex-col gap-2">
 
             {/* Image preview + options inline (shown inside box if image IS uploaded) */}
             <AnimatePresence>
@@ -630,40 +659,41 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex items-center gap-3 w-full bg-white/2 rounded-xl p-2 border border-white/5"
+                  className="flex items-center gap-3 w-full bg-slate-50 rounded-xl p-2.5 border border-slate-200 shadow-sm mb-2"
                 >
                   {/* Image preview */}
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/15 shadow-md flex-shrink-0">
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm flex-shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={imagePreview} alt="Selected" className="w-full h-full object-cover" />
                     <button
                       onClick={removeImage}
-                      className="absolute top-1 right-1 bg-black/70 rounded-full p-1 hover:bg-neutral-800 transition"
+                      className="absolute top-1 right-1 bg-white/90 text-slate-700 rounded-full p-1 hover:bg-white hover:text-red-500 transition shadow-sm backdrop-blur-md"
                     >
-                      <X size={10} />
+                      <X size={12} />
                     </button>
                   </div>
 
                   {/* Inline options beside the image */}
-                  <div className="flex-1 flex flex-col sm:flex-row gap-2">
-                    <div className="flex-1 flex flex-col gap-1">
-                      <label className="text-[10px] text-teal-400 font-semibold tracking-wider uppercase px-1">Plant Type</label>
+                  <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label className="text-[10px] text-teal-600 font-bold tracking-wider uppercase px-1">Plant Type</label>
                       <select
                         value={plantType}
                         onChange={(e) => setPlantType(e.target.value)}
-                        className="w-full rounded-lg bg-black/40 border border-white/10 px-3 py-1.5 text-xs text-white outline-none focus:border-teal-500/50 transition"
+                        className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-sm"
                       >
-                        {PLANT_OPTIONS.map((p) => <option key={p} className="bg-black">{p}</option>)}
+                        {PLANT_OPTIONS.map((p) => <option key={p} className="bg-white">{p}</option>)}
                       </select>
                     </div>
-                    <div className="flex-1 flex flex-col gap-1">
-                      <label className="text-[10px] text-teal-400 font-semibold tracking-wider uppercase px-1">Location</label>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label className="text-[10px] text-teal-600 font-bold tracking-wider uppercase px-1">Location</label>
                       <input
                         type="text"
                         placeholder="Location (e.g. Asansol, India)"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full rounded-lg bg-black/40 border border-white/10 px-3 py-1.5 text-xs text-white placeholder:text-white/30 outline-none focus:border-teal-500/50 transition"
+                        onKeyDown={handleKeyDown}
+                        className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-sm"
                       />
                     </div>
                   </div>
@@ -678,13 +708,13 @@ export default function Home() {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Describe your plant's condition, or just attach a photo…"
-              rows={2}
-              className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none resize-none leading-relaxed"
+              rows={1}
+              className="w-full bg-transparent text-[15px] font-medium text-slate-900 placeholder:text-slate-400 outline-none resize-none px-1 py-1"
             />
 
             {/* Bottom action row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center gap-1.5">
 
                 {/* Hidden file input */}
                 <input
@@ -698,25 +728,25 @@ export default function Home() {
                 {/* Attach photo */}
                 <motion.button
                   whileTap={{ scale: 0.88 }}
-                  whileHover={{ scale: 1.08 }}
+                  whileHover={{ scale: 1.05 }}
                   onClick={() => fileInputRef.current?.click()}
                   title="Attach leaf image"
-                  className={`h-9 w-9 rounded-xl flex items-center justify-center transition-colors ${imageFile ? "bg-teal-500/20 text-teal-400 border border-teal-500/30" : "hover:bg-white/10 text-white/50"
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${imageFile ? "bg-teal-50 text-teal-600 border border-teal-200 shadow-sm" : "hover:bg-slate-100 text-slate-500"
                     }`}
                 >
-                  {imageFile ? <ImageIcon size={17} /> : <Paperclip size={17} />}
+                  {imageFile ? <ImageIcon size={18} /> : <Paperclip size={18} />}
                 </motion.button>
 
                 {/* Options toggle */}
                 <motion.button
                   whileTap={{ scale: 0.88 }}
-                  whileHover={{ scale: 1.08 }}
+                  whileHover={{ scale: 1.05 }}
                   onClick={() => setShowOptions((v) => !v)}
                   title="Set plant type & location"
-                  className={`h-9 rounded-xl px-3 flex items-center gap-1.5 text-xs transition-colors ${(showOptions && !imageFile) ? "bg-teal-500/20 text-teal-400 border border-teal-500/30" : "hover:bg-white/10 text-white/40"
+                  className={`h-10 rounded-xl px-4 flex items-center gap-2 text-sm font-semibold transition-colors ${(showOptions && !imageFile) ? "bg-teal-50 text-teal-600 border border-teal-200 shadow-sm" : "hover:bg-slate-100 text-slate-500"
                     }`}
                 >
-                  <Sprout size={14} />
+                  <Sprout size={16} />
                   <span>{plantType}</span>
                 </motion.button>
 
@@ -725,12 +755,12 @@ export default function Home() {
               {/* Send */}
               <motion.button
                 whileTap={{ scale: 0.88 }}
-                whileHover={canSend ? { scale: 1.06 } : {}}
+                whileHover={canSend ? { scale: 1.05 } : {}}
                 onClick={handleSend}
                 disabled={!canSend}
-                className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 ${canSend
-                  ? "bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-500/25"
-                  : "bg-white/8 text-white/20 cursor-not-allowed"
+                className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-200 ${canSend
+                  ? "bg-teal-500 hover:bg-teal-600 text-white shadow-md shadow-teal-500/25"
+                  : "bg-slate-100 text-slate-300 cursor-not-allowed"
                   }`}
               >
                 {appState === "thinking" ? (
@@ -741,13 +771,13 @@ export default function Home() {
                     <Zap size={16} />
                   </motion.div>
                 ) : (
-                  <ArrowUp size={16} />
+                  <ArrowUp size={18} />
                 )}
               </motion.button>
             </div>
           </div>
 
-          <p className="text-center text-xs text-white/20 mt-2">
+          <p className="text-center text-xs font-semibold text-slate-400 mt-3">
             PlantMD · Powered by deep learning + live weather data
           </p>
         </div>
